@@ -1,3 +1,4 @@
+# Represents a single record of stock data
 class StockData:
     def __init__(self, date, close_price, volume, open_price, high, low):
         self.date = date

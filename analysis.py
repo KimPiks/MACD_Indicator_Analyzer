@@ -1,22 +1,23 @@
 import sys
-import os
-from read_data import get_stock_data
-from financial_instrument_chart import create_product_chart
-from macd_chart import create_macd_chart
-from simulation import simulation
+from stock import Stock
 
 # USAGE: py analysis.py <input_file_path> <product_name>
 
+# Input file path and product name from the command line arguments
 input_file_path = sys.argv[1]
 product_name = sys.argv[2]
 
-# Create directory for the output files with the product name
-os.makedirs(product_name, exist_ok=True)
+# Remove all invisible and problematic characters from the product name
+product_name = product_name.replace("\r", "")
+product_name = product_name.replace("\n", "")
+product_name = product_name.replace("\t", "")
+product_name = product_name.replace(" ", "")
+product_name = product_name.replace("/", "")
+product_name = product_name.replace("\\", "")
 
-# Get stock data from the input file
-data = get_stock_data(input_file_path)
+print(f"> Analyzing {product_name} stock data from {input_file_path}")
 
-# Create product chart and MACD chart
-create_product_chart(data, product_name)
-create_macd_chart(data, product_name)
-simulation(data, product_name)
+stock = Stock(input_file_path, product_name)
+stock.generate_price_chart()
+stock.generate_macd_chart()
+stock.simulate_strategies()

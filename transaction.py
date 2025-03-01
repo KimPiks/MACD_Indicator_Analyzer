@@ -1,3 +1,4 @@
+# Represents a single transaction in the stock market
 class Transaction:
     def __init__(self, transaction_type, amount, unit_price):
         self.transaction_type = transaction_type

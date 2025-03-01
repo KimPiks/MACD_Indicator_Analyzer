@@ -2,3 +2,5 @@
 __pycache__/
 parse_data.py
 stock_data/
+for_analysis.txt
+raport/

@@ -1,113 +1,159 @@
-from macd import calculate_macd, calculate_signal
 from transaction import Transaction
+from simulation_utils import SimulationUtils as SimUtils
 import matplotlib.pyplot as plt
 
-# X-axis of the chart
-date_data = []
+# Represents simulation logic for MACD and Buy and Hold strategies
+class Simulation:
+    CAPITAL_MULTIPLIER = 1000
 
-# Y-axis of the chart
-price_data = []
+    def __init__(self, product, output_dir):
+        self.product = product
+        self.output_dir = output_dir
 
-# Buy and sell signals
-buy_signals = []
-sell_signals = []
+    # Run simulation for MACD and Buy and Hold strategies
+    def run_simulation(self):
+        self.__simulation_macd()
+        self.__simulation_buy_and_hold()
 
-def set_x_y_axis_data(stock_data):
-    # Extracting the data from the stock_data
-    for data in stock_data:
-        date_data.append(data.date)
-        price_data.append(data.close_price)
+    # Run simulation for MACD strategy
+    def __simulation_macd(self):
+        cash_capital = self.CAPITAL_MULTIPLIER * self.product.stock_data[0].close_price
+        capital_history = [cash_capital for _ in range(36)] # 36th day is the first valid day for MACD
+        shares_count = 0
+        transactions = []
+        buy_transactions_indexes = []
+        sell_transactions_indexes = []
 
-def define_buy_sell_signals(macd, signal):
-    for i in range(1, len(macd)):
-        if macd[i] > signal[i] and macd[i - 1] < signal[i - 1]:
-            buy_signals.append(i)
-        if macd[i] < signal[i] and macd[i - 1] > signal[i - 1]:
-            sell_signals.append(i)
+        transactions_log_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd_transaction_log.txt'
+        summary_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd_summary.txt'
 
-def log_capital(file, capital, shares, shares_value):
-    file.write("-------------------------\n")
-    file.write(f"Kapitał: ${round(capital, 2)}\n")
-    file.write(f"Liczba akcji: {shares}\n")
-    file.write(f"Wartość akcji: ${round(shares_value, 2)}\n")
-    file.write("-------------------------\n")
+        transactions_log_file = open(transactions_log_file_path, 'w')
+        summary_file = open(summary_file_path, 'w')
 
-def log_transaction(file, type, shares, price):
-    file.write(f"{type} {shares} akcji po cenie {price}\n")
+        for i in range(36, len(self.product.stock_data)):
+            if i in self.product.buy_signals:
+                shares_amount_to_buy = capital_history[-1] // self.product.stock_data[i].close_price
+                # We can't buy shares if we don't have enough capital
+                if shares_amount_to_buy == 0:
+                    capital_history.append(cash_capital + shares_count * self.product.stock_data[i].close_price)
+                    continue
 
-def create_simulation_chart(product_name, capital_history, buy_transactions_indexes, sell_transactions_indexes):
-    plt.figure(figsize=(12, 6))
-    plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Kapitał początkowy', linewidth=1,
-             linestyle='--')
-    plt.plot(date_data, capital_history, label='Kapitał', linewidth=1, linestyle='-')
-    plt.xlabel('Data')
-    plt.xticks(ticks=date_data[::251], labels=date_data[::251])
-    plt.title(f'Symulacja transakcji ({product_name})')
-    plt.ylabel('Kapitał (USD)')
+                # Buy as many shares as possible
+                transaction = Transaction('BUY', shares_amount_to_buy, self.product.stock_data[i].close_price)
+                transactions.append(transaction)
+                cash_capital -= shares_amount_to_buy * self.product.stock_data[i].close_price
+                shares_count += shares_amount_to_buy
+                buy_transactions_indexes.append(i)
 
-    plt.scatter([date_data[i] for i in buy_transactions_indexes],
-                [capital_history[i] for i in buy_transactions_indexes], marker='^', color='green',
-                label='Sygnał zakupu', zorder=2)
-    plt.scatter([date_data[i] for i in sell_transactions_indexes],
-                [capital_history[i] for i in sell_transactions_indexes], marker='v', color='red',
-                label='Sygnał sprzedaży', zorder=2)
+                # Log transaction to file
+                SimUtils.log_transaction(transactions_log_file, 'BUY', shares_amount_to_buy, self.product.stock_data[i].close_price)
+            elif i in self.product.sell_signals:
+                # We can't sell shares if we don't have any
+                if shares_count == 0:
+                    capital_history.append(cash_capital + shares_count * self.product.stock_data[i].close_price)
+                    continue
 
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.savefig(f'{product_name}/simulation.png')
+                # Sell all shares
+                transaction = Transaction('SELL', shares_count, self.product.stock_data[i].close_price)
+                transactions.append(transaction)
+                cash_capital += shares_count * self.product.stock_data[i].close_price
+                shares_count = 0
+                sell_transactions_indexes.append(i)
 
+                # Log transaction to file
+                SimUtils.log_transaction(transactions_log_file, 'SELL', transaction.amount, transaction.unit_price)
 
-def simulation(stock_data, product_name):
-    # Initial capital (1000 units * the price of the first stock)
-    capital_multiplier = 1000
-    capital = capital_multiplier * stock_data[0].close_price
-    capital_history = [capital for _ in range(26)]
-    shares_count = 0
-    transactions = []
-    buy_transactions_indexes = []
-    sell_transactions_indexes = []
+            # Update capital history
+            capital_history.append(cash_capital + shares_count * self.product.stock_data[i].close_price)
 
-    set_x_y_axis_data(stock_data)
+        # Log summary
+        start_capital = capital_history[0]
+        end_capital = capital_history[-1]
+        SimUtils.log_capital_summary(summary_file, start_capital, end_capital)
+        SimUtils.log_transactions_summary(summary_file, transactions)
 
-    macd = calculate_macd(stock_data)
-    signal = calculate_signal(stock_data)
-    define_buy_sell_signals(macd, signal)
+        transactions_log_file.close()
+        summary_file.close()
 
-    # Simulation log file
-    f = open(f'{product_name}/simulation_log.txt', 'w')
-    f.write(f"Kapitał początkowy: {round(capital, 2)}\n")
+        self.__generate_macd_simulation_chart(capital_history, buy_transactions_indexes, sell_transactions_indexes)
 
-    for i in range(26, len(stock_data)):
-        if i in buy_signals:
-            amount = capital // stock_data[i].close_price
-            if amount == 0:
-                continue
+    # Run simulation for Buy and Hold strategy
+    def __simulation_buy_and_hold(self):
+        cash_capital = self.CAPITAL_MULTIPLIER * self.product.stock_data[0].close_price
+        capital_history = []
+        shares_count = 0
+        transactions = []
 
-            transactions.append(Transaction('BUY', amount, stock_data[i].close_price))
-            shares_count += amount
-            capital -= amount * stock_data[i].close_price
-            capital_history.append(capital + shares_count * stock_data[i].close_price)
-            buy_transactions_indexes.append(i)
+        summary_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold_summary.txt'
+        summary_file = open(summary_file_path, 'w')
 
-            log_transaction(f, 'BUY', amount, stock_data[i].close_price)
-            log_capital(f, capital, shares_count, shares_count * stock_data[i].close_price)
-        elif i in sell_signals and len(transactions) > 0 and shares_count > 0:
-            transactions.append(Transaction('SELL', shares_count, stock_data[i].close_price))
-            capital += shares_count * stock_data[i].close_price
-            shares_count = 0
-            capital_history.append(capital)
-            sell_transactions_indexes.append(i)
+        # Buy transaction on the first day
+        shares_amount = cash_capital // self.product.stock_data[0].close_price
+        buy_transaction = Transaction('BUY', shares_amount, self.product.stock_data[0].close_price)
+        transactions.append(buy_transaction)
+        cash_capital -= shares_amount * self.product.stock_data[0].close_price
+        shares_count += shares_amount
+        capital_history.append(round(cash_capital + shares_count * self.product.stock_data[0].close_price, 2))
 
-            log_transaction(f, 'SELL', transactions[-1].amount, stock_data[i].close_price)
-            log_capital(f, capital, shares_count, shares_count * stock_data[i].close_price)
-        else:
-            capital_history.append(capital + shares_count * stock_data[i].close_price)
+        for i in range(1, len(self.product.stock_data) - 1):
+            capital_history.append(round(cash_capital + shares_count * self.product.stock_data[i].close_price, 2))
 
-    f.write("===========================\n")
-    f.write(f"Kapitał początkowy: ${round(capital_multiplier * stock_data[0].close_price, 2)}\n")
-    f.write(f"Kapitał końcowy: ${round((capital + shares_count * stock_data[-1].close_price), 2)}\n")
-    f.write(f"Zysk: ${round((capital + shares_count * stock_data[-1].close_price) - (capital_multiplier * stock_data[0].close_price), 2)}\n")
-    f.write("===========================\n")
-    f.close()
+        # Sell transaction on the last day
+        sell_transaction = Transaction('SELL', shares_count, self.product.stock_data[-1].close_price)
+        transactions.append(sell_transaction)
+        cash_capital += shares_count * self.product.stock_data[-1].close_price
+        capital_history.append(round(cash_capital, 2))
+        shares_count = 0
 
-    create_simulation_chart(product_name, capital_history, buy_transactions_indexes, sell_transactions_indexes)
+        # Log summary
+        start_capital = round(self.CAPITAL_MULTIPLIER * self.product.stock_data[0].close_price, 2)
+        end_capital = round(cash_capital, 2)
+        SimUtils.log_capital_summary(summary_file, start_capital, end_capital)
+        SimUtils.log_transactions_summary(summary_file, transactions)
+
+        summary_file.close()
+
+        self.__generate_buy_and_hold_simulation_chart(capital_history)
+
+    # Generate chart for MACD simulation
+    def __generate_macd_simulation_chart(self, capital_history, buy_transactions_indexes, sell_transactions_indexes, x_ticks = 251):
+        date_data = [data.date for data in self.product.stock_data]
+
+        plt.figure(figsize=(15, 6))
+        plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Kapitał początkowy',
+                 linewidth=1,
+                 linestyle='--')
+        plt.plot(date_data, capital_history, label='Kapitał', linewidth=1, linestyle='-')
+        plt.xlabel('Data')
+        plt.xticks(ticks=date_data[::x_ticks], labels=date_data[::x_ticks])
+        plt.title(f'Symulacja transakcji ({self.product.product_name}) - strategia MACD')
+        plt.ylabel('Kapitał (USD)')
+
+        plt.scatter([date_data[i] for i in buy_transactions_indexes],
+                    [capital_history[i] for i in buy_transactions_indexes], marker='^', color='green',
+                    label='Sygnał zakupu', zorder=2)
+        plt.scatter([date_data[i] for i in sell_transactions_indexes],
+                    [capital_history[i] for i in sell_transactions_indexes], marker='v', color='red',
+                    label='Sygnał sprzedaży', zorder=2)
+
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd.png')
+
+    # Generate chart for Buy and Hold simulation
+    def __generate_buy_and_hold_simulation_chart(self, capital_history, x_ticks = 251):
+        date_data = [data.date for data in self.product.stock_data]
+
+        plt.figure(figsize=(15, 6))
+        plt.plot(date_data, capital_history, label='Kapitał', linewidth=1, linestyle='-')
+        plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Kapitał początkowy',
+                 linewidth=1,
+                 linestyle='--')
+        plt.xlabel('Data')
+        plt.xticks(ticks=date_data[::x_ticks], labels=date_data[::x_ticks])
+        plt.title(f'Symulacja transakcji ({self.product.product_name}) - strategia Buy and Hold')
+        plt.ylabel('Kapitał (USD)')
+
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold.png')
