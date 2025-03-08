@@ -35,7 +35,7 @@ class TradingCalculator:
             ema_val = 0
             div = 0
 
-            for j in range (0, period):
+            for j in range (0, period+1):
                 ema_val += (1 - alfa) ** j * data[i - j]
                 div += (1 - alfa) ** j
 
