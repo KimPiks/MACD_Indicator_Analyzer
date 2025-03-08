@@ -138,7 +138,7 @@ class Simulation:
 
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd.png')
+        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd.png', bbox_inches='tight')
 
     # Generate chart for Buy and Hold simulation
     def __generate_buy_and_hold_simulation_chart(self, capital_history, x_ticks = 251):
@@ -156,4 +156,4 @@ class Simulation:
 
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold.png')
+        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold.png', bbox_inches='tight')

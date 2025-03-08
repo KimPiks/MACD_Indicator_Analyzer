@@ -29,7 +29,7 @@ class FinancialInstrument:
         plt.xticks(ticks=date_data[::x_ticks], labels=date_data[::x_ticks])
         plt.title(f'Wycena ({self.product_name})')
         plt.grid(True, alpha=0.3)
-        plt.savefig(output_path)
+        plt.savefig(output_path, bbox_inches='tight')
 
     # Generates a MACD chart and saves it to a file
     def generate_macd_chart(self, output_path, x_ticks=251):
@@ -50,4 +50,4 @@ class FinancialInstrument:
 
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.savefig(output_path)
+        plt.savefig(output_path, bbox_inches='tight')
