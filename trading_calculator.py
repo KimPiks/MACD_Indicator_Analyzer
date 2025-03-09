@@ -19,6 +19,9 @@ class TradingCalculator:
         self.buy_signals = self.__calculate_buy_signals(self.macd, self.signal)
         self.sell_signals = self.__calculate_sell_signals(self.macd, self.signal)
 
+        # Validate signals
+        self.sell_signals, self.buy_signals = self.__validate_signals(self.sell_signals, self.buy_signals)
+
     # Calculate EMA for a given period and data
     @staticmethod
     def __calculate_ema(period, data):
@@ -75,3 +78,10 @@ class TradingCalculator:
             if macd[i] < signal[i] and macd[i - 1] > signal[i - 1]:
                 sell_signals.append(i)
         return sell_signals
+
+    # Ensure that the sell signal is not generated before the buy signal
+    @staticmethod
+    def __validate_signals(sell_signals, buy_signals):
+        if sell_signals[0] < buy_signals[0]:
+            sell_signals.pop(0)
+        return sell_signals, buy_signals

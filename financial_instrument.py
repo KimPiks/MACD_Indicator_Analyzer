@@ -56,9 +56,8 @@ class FinancialInstrument:
     # Generates approximate charts for each transaction
     def generate_transaction_charts(self, output_dir):
         for i in range(len(self.buy_signals)):
-            # Remove sell signal that are before first buy signal
-            if self.sell_signals[i] < self.buy_signals[i]:
-                self.sell_signals.pop(i)
+            if len(self.sell_signals) == i:
+                break
 
             # X-axis data (10 days before buy signal to 10 days after sell signal)
             date_data = [data.date for data in self.stock_data[self.buy_signals[i] - 10:self.sell_signals[i] + 11]]
