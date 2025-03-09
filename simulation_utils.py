@@ -1,8 +1,8 @@
 # Represents utility functions for simulation logic
 class SimulationUtils:
     @staticmethod
-    def log_transaction(file, transaction_type, shares_amount, share_price):
-        file.write(f"{transaction_type} - {shares_amount} akcji po cenie ${round(share_price, 2)}\n")
+    def log_transaction(file, date, transaction_type, shares_amount, share_price):
+        file.write(f"[{date}] {transaction_type} - {shares_amount} akcji po cenie ${round(share_price, 2)}\n")
 
     @staticmethod
     def log_capital_summary(file, start_capital, end_capital):

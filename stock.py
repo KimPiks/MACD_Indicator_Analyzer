@@ -48,15 +48,28 @@ class Stock:
         if not os.path.exists(self.OUTPUT_DIR):
             os.makedirs(self.OUTPUT_DIR)
 
+        if not os.path.exists(f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}'):
+            os.makedirs(f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}')
+
+        if not os.path.exists(f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}/transactions'):
+            os.makedirs(f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}/transactions')
+
     # Generate a price chart for the stock product
     def generate_price_chart(self):
         self.__ensure_output_dir_exists()
-        self.product.generate_price_chart(f'{self.OUTPUT_DIR}/{self.product_name}-price-chart.png')
+        output_path = f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}/{self.product_name.replace("/", "")}-price-chart.png'
+        self.product.generate_price_chart(output_path)
 
     # Generate a MACD chart for the stock product
     def generate_macd_chart(self):
         self.__ensure_output_dir_exists()
-        self.product.generate_macd_chart(f'{self.OUTPUT_DIR}/{self.product_name}-macd-chart.png')
+        output_path = f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}/{self.product_name.replace("/", "")}-macd-chart.png'
+        self.product.generate_macd_chart(output_path)
+
+    # Generate approximate charts for each transaction
+    def generate_transaction_charts(self):
+        self.__ensure_output_dir_exists()
+        self.product.generate_transaction_charts(self.OUTPUT_DIR)
 
     # Simulate a MACD and Buy & Hold strategy for the stock product
     def simulate_strategies(self):

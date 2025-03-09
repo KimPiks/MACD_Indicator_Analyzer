@@ -24,8 +24,8 @@ class Simulation:
         buy_transactions_indexes = []
         sell_transactions_indexes = []
 
-        transactions_log_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd_transaction_log.txt'
-        summary_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd_summary.txt'
+        transactions_log_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}/{self.product.product_name.replace("/", "")}-simulation-macd_transaction_log.txt'
+        summary_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}/{self.product.product_name.replace("/", "")}-simulation-macd_summary.txt'
 
         transactions_log_file = open(transactions_log_file_path, 'w')
         summary_file = open(summary_file_path, 'w')
@@ -46,7 +46,7 @@ class Simulation:
                 buy_transactions_indexes.append(i)
 
                 # Log transaction to file
-                SimUtils.log_transaction(transactions_log_file, 'BUY', shares_amount_to_buy, self.product.stock_data[i].close_price)
+                SimUtils.log_transaction(transactions_log_file, self.product.stock_data[i].date, 'BUY', shares_amount_to_buy, self.product.stock_data[i].close_price)
             elif i in self.product.sell_signals:
                 # We can't sell shares if we don't have any
                 if shares_count == 0:
@@ -61,7 +61,7 @@ class Simulation:
                 sell_transactions_indexes.append(i)
 
                 # Log transaction to file
-                SimUtils.log_transaction(transactions_log_file, 'SELL', transaction.amount, transaction.unit_price)
+                SimUtils.log_transaction(transactions_log_file, self.product.stock_data[i].date, 'SELL', transaction.amount, transaction.unit_price)
 
             # Update capital history
             capital_history.append(cash_capital + shares_count * self.product.stock_data[i].close_price)
@@ -84,7 +84,7 @@ class Simulation:
         shares_count = 0
         transactions = []
 
-        summary_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold_summary.txt'
+        summary_file_path = f'{self.output_dir}/{self.product.product_name.replace("/", "")}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold_summary.txt'
         summary_file = open(summary_file_path, 'w')
 
         # Buy transaction on the first day
@@ -138,7 +138,8 @@ class Simulation:
 
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-macd.png', bbox_inches='tight')
+        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}/{self.product.product_name.replace("/", "")}-simulation-macd.png', bbox_inches='tight')
+        plt.close()
 
     # Generate chart for Buy and Hold simulation
     def __generate_buy_and_hold_simulation_chart(self, capital_history, x_ticks = 251):
@@ -156,4 +157,5 @@ class Simulation:
 
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold.png', bbox_inches='tight')
+        plt.savefig(f'{self.output_dir}/{self.product.product_name.replace("/", "")}/{self.product.product_name.replace("/", "")}-simulation-buy-and-hold.png', bbox_inches='tight')
+        plt.close()
