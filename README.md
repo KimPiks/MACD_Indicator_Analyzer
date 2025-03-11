@@ -14,12 +14,17 @@ It generates a summary showing the profit and list of transactions for both stra
 git clone https://github.com/KimPiks/MACD_Indicator_Analyzer.git
 ```
 
-2. Install the required packages
+2. Go to the project directory.
+```bash
+cd MACD_Indicator_Analyzer
+```
+
+3. Install the required packages
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create `for_analysis.txt` file in the script folder and add the financial instruments you want to analyze. 
+4. Create `for_analysis.txt` file in the script folder and add the financial instruments you want to analyze. 
 Each instrument should be in a separate line. The first column should be the path to the data file, and the second column should be the name of the instrument.
 
 Example:
@@ -27,7 +32,7 @@ Example:
 stock_data/gold.csv Gold
 ```
 
-4. Run the script
+5. Run the script
 
 Windows:
 ```bash
@@ -53,3 +58,13 @@ Each instrument has its own folder with the following files:
 Also for each transaction, the script generates a folder `transactions` with the following files:
 - `X-transaction-Y.png` - approximate chart of the transaction
 - `X-transaction-macd-Y.txt` - summary of the transaction
+
+## .csv file structure
+```
+Date,Close/Last,Volume,Open,High,Low
+02/24/2025,$2952.76,0,$2934.13,$2956.18,$2921.55
+02/21/2025,$2934.92,0,$2938.78,$2949.79,$2917.07
+02/20/2025,$2939.675,0,$2933.46,$2954.88,$2924.63
+02/19/2025,$2932.94,0,$2935.52,$2946.91,$2918.95
+...
+```
