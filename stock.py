@@ -57,19 +57,22 @@ class Stock:
     # Generate a price chart for the stock product
     def generate_price_chart(self):
         self.__ensure_output_dir_exists()
-        output_path = f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}/{self.product_name.replace("/", "")}-price-chart.png'
-        self.product.generate_price_chart(output_path)
+        self.product.generate_price_chart(self.OUTPUT_DIR)
 
     # Generate a MACD chart for the stock product
     def generate_macd_chart(self):
         self.__ensure_output_dir_exists()
-        output_path = f'{self.OUTPUT_DIR}/{self.product_name.replace("/", "")}/{self.product_name.replace("/", "")}-macd-chart.png'
-        self.product.generate_macd_chart(output_path)
+        self.product.generate_macd_chart(self.OUTPUT_DIR)
 
     # Generate approximate charts for each transaction
     def generate_transaction_charts(self):
         self.__ensure_output_dir_exists()
         self.product.generate_transaction_charts(self.OUTPUT_DIR)
+
+    # Generate approximate charts for each transaction (MACD)
+    def generate_macd_transaction_charts(self):
+        self.__ensure_output_dir_exists()
+        self.product.generate_macd_transaction_charts(self.OUTPUT_DIR)
 
     # Simulate a MACD and Buy & Hold strategy for the stock product
     def simulate_strategies(self):

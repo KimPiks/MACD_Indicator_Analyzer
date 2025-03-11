@@ -18,15 +18,19 @@ class SimulationUtils:
         transactions_count = len(transactions)
         last_buy_price = None
         profit_transactions = 0
+        loss_transactions = 0
 
         for i in range(transactions_count):
             if transactions[i].transaction_type == "BUY":
                 last_buy_price = transactions[i].unit_price
             elif transactions[i].unit_price > last_buy_price:
                 profit_transactions += 1
+            else:
+                loss_transactions += 1
+
 
         file.write("===========================\n")
         file.write(f"Liczba transakcji: {transactions_count}\n")
         file.write(f"Liczba zyskownych transakcji: {profit_transactions}\n")
-        file.write(f"Liczba niezyskowych transakcji: {transactions_count - profit_transactions}\n")
+        file.write(f"Liczba niezyskowych transakcji: {loss_transactions}\n")
         file.write("===========================\n")
