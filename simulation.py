@@ -119,22 +119,22 @@ class Simulation:
     def __generate_macd_simulation_chart(self, capital_history, buy_transactions_indexes, sell_transactions_indexes, x_ticks = 251):
         date_data = [data.date for data in self.product.stock_data]
 
-        plt.figure(figsize=(15, 6))
-        plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Kapitał początkowy',
+        plt.figure(figsize=(12, 6))
+        plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Initial capital',
                  linewidth=1,
                  linestyle='--')
-        plt.plot(date_data, capital_history, label='Kapitał', linewidth=1, linestyle='-')
-        plt.xlabel('Data')
+        plt.plot(date_data, capital_history, label='Capital', linewidth=1, linestyle='-')
+        plt.xlabel('Date')
         plt.xticks(ticks=date_data[::x_ticks], labels=date_data[::x_ticks])
-        plt.title(f'Symulacja transakcji ({self.product.product_name}) - strategia MACD')
-        plt.ylabel('Kapitał (USD)')
+        plt.title(f'Transaction simulation ({self.product.product_name}) - MACD strategy')
+        plt.ylabel('Capital (USD)')
 
         plt.scatter([date_data[i] for i in buy_transactions_indexes],
                     [capital_history[i] for i in buy_transactions_indexes], marker='^', color='green',
-                    label='Sygnał zakupu', zorder=2)
+                    label='Buy signal', zorder=2)
         plt.scatter([date_data[i] for i in sell_transactions_indexes],
                     [capital_history[i] for i in sell_transactions_indexes], marker='v', color='red',
-                    label='Sygnał sprzedaży', zorder=2)
+                    label='Sell signal', zorder=2)
 
         plt.legend()
         plt.grid(True, alpha=0.3)
@@ -145,15 +145,15 @@ class Simulation:
     def __generate_buy_and_hold_simulation_chart(self, capital_history, x_ticks = 251):
         date_data = [data.date for data in self.product.stock_data]
 
-        plt.figure(figsize=(15, 6))
-        plt.plot(date_data, capital_history, label='Kapitał', linewidth=1, linestyle='-')
-        plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Kapitał początkowy',
+        plt.figure(figsize=(12, 6))
+        plt.plot(date_data, capital_history, label='Capital', linewidth=1, linestyle='-')
+        plt.plot(date_data, [capital_history[0] for _ in range(len(date_data))], label='Initial capital',
                  linewidth=1,
                  linestyle='--')
-        plt.xlabel('Data')
+        plt.xlabel('Date')
         plt.xticks(ticks=date_data[::x_ticks], labels=date_data[::x_ticks])
-        plt.title(f'Symulacja transakcji ({self.product.product_name}) - strategia Buy and Hold')
-        plt.ylabel('Kapitał (USD)')
+        plt.title(f'Transaction simulation ({self.product.product_name}) - Buy and Hold strategy')
+        plt.ylabel('Capital (USD)')
 
         plt.legend()
         plt.grid(True, alpha=0.3)
