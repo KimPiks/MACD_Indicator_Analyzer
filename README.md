@@ -1,7 +1,7 @@
 # MACD Indicator Analyzer
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/KimPiks/MACD_Indicator_Analyzer/refs/heads/main/simulation-readme.png?token=GHSAT0AAAAAAC4TYR45KSK3SZW3DGEN2CLAZ6QRTNA" alt="Example simulation chart" width="75%" />
+  <img src="https://raw.githubusercontent.com/KimPiks/MACD_Indicator_Analyzer/refs/heads/main/simulation-readme.png" alt="Example simulation chart" width="75%" />
 </div>
 
 
